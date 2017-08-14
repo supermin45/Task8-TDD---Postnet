@@ -6,51 +6,42 @@ var sinonChai = require("sinon-chai");
 var expect = chai.expect;
 chai.use(sinonChai);
 
-var main = require("../lib/main.js");
+var postNet = require("../lib/main.js");
 
-describe("PostNet encode and decode", function(){
+describe("PostNet encode and decode", function () {
     sinon.spy(console, 'log');
 
-    it("it returns the barcode string given the five digit post number", function(){
+    it("it returns the encoded barcode string given the post number", function () {
 
-        var result = main('95713');
-        var expect_string = '| |:|:: :|:|: |:::| :::|| ::||: :|:|: |';
-        
-        expect(expect_string).to.equal(result);
+        var inputs = ['95713', '957139571', '95713-9571'];
+        var expect_string = ['| |:|:: :|:|: |:::| :::|| ::||: :|:|: |', '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |', '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |'];
+
+        inputs.forEach((input, i) => {
+            var result = postNet.postEncode(input);
+            expect(expect_string[i]).to.equal(result);
+        });
     });
 
-    it("it returns the barcode string given the nine digit post number", function(){
 
-        var result = main('957139571');
-        var expect_string = '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |';
+    it("it returns the decoded post number given the barcode string", function () {
 
-        expect(expect_string).to.equal(result);
+        var inputs = ['| |:|:: :|:|: |:::| :::|| ::||: :|:|: |', '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |'];
+        var expect_string = ['95713', '95713-9571'];
+
+        inputs.forEach((input, i) => {
+            var result = postNet.postDecode(input);
+            expect(expect_string[i]).to.equal(result);
+        });
     });
 
-    it("it returns the barcode string given the ten digit post number", function(){
+    it("it returns the encoded barcode string or the decoded post number given the post number or barcode string", function () {
 
-        var result = main('95713-9571');
-        var expect_string = '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |';
+        var inputs = ['95713', '957139571', '95713-9571', '| |:|:: :|:|: |:::| :::|| ::||: :|:|: |', '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |']
+        var expect_string = ['| |:|:: :|:|: |:::| :::|| ::||: :|:|: |', '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |', '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |', '95713', '95713-9571'];
 
-        expect(expect_string).to.equal(result);
+        inputs.forEach((input, i) => {
+            var result = postNet.main(input);
+            expect(expect_string[i]).to.equal(result);
+        });
     });
-
-    it("it returns the post number given the six digit barcode string", function(){
-
-        let str = '| |:|:: :|:|: |:::| :::|| ::||: :|:|: |';
-        var result = main(str);
-        var expect_string = '95713';
-
-        expect(expect_string).to.equal(result);
-    });
-
-    it("it returns the post number given the ten digit barcode string", function(){
-
-        let str = '| |:|:: :|:|: |:::| :::|| ::||: |:|:: :|:|: |:::| :::|| ::||: |';
-        var result = main(str);
-        var expect_string = '95713-9571';
-
-        expect(expect_string).to.equal(result);
-    });
-
 });
